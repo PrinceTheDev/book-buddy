@@ -5,17 +5,18 @@ This modeule contains specific functions that will be used to load the database 
 import os
 import csv
 import django
-from books.model import Book, User, Rating
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_buddy.settings')
 django.setup()
 
+from books.models import Book, User, Rating
 
-def load_books(file_path='dataset/BX-books.csv'):
+
+def load_books(file_path='dataset/books.csv'):
     """loads the databse for the books"""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        reader= csv.DictReader(file, dlimeter=';')
+    with open(file_path, 'r', encoding='ISO-8859-1') as file:
+        reader= csv.DictReader(file, delimiter=';')
         for row in reader:
             Book.objects.get_or_create(
                 isbn=row['ISBN'],
@@ -30,9 +31,9 @@ def load_books(file_path='dataset/BX-books.csv'):
                 }
             )
 
-def load_users(file_path='dataset/BX-users.csv'):
+def load_users(file_path='dataset/users.csv'):
     """loads the daabase for users"""
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='ISO-8859-1') as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             User.objects.get_or_create(
@@ -43,9 +44,9 @@ def load_users(file_path='dataset/BX-users.csv'):
                 }
             )
 
-def load_ratings(file_path='datset/BX-ratings.csv'):
+def load_ratings(file_path='datset/ratings.csv'):
     """This functio loads the database for the books ratings"""
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='ISO-8859-1') as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             user = User.objects.get(user_id=int(row['User-ID']))
@@ -57,7 +58,7 @@ def load_ratings(file_path='datset/BX-ratings.csv'):
             )
 
 
-if __name_=='__main__':
+if __name__=='__main__':
     load_books()
     load_users()
     load_ratings()
