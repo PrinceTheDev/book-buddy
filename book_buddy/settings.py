@@ -79,8 +79,12 @@ WSGI_APPLICATION = 'book_buddy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'book_buddy_db',
+        'USER': 'book_buddy',
+        'PASSWORD': 'Sinbad1738',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
