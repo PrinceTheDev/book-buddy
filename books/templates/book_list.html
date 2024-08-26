@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Books - Book Buddy{% endblock %}
+
+{% block content %}
+    <section>
+        <h1>All Books</h1>
+        <ul>
+            {% for book in books %}
+                <li>
+                    <a href="{% url 'book_detail' book.isbn %}">{{ book.title }}</a>
+                    by {{ book.author }}
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endblock %}
+

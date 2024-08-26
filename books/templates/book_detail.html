@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} - Book Buddy{% endblock %}
+
+{% block content %}
+    <section>
+        <h1>{{ book.title }}</h1>
+        <p><strong>Author:</strong> {{ book.author }}</p>
+        <p><strong>Year of Publication:</strong> {{ book.year_of_publication }}</p>
+        <p><strong>Publisher:</strong> {{ book.publisher }}</p>
+        <img src="{{ book.image_url_m }}" alt="{{ book.title }}">
+    </section>
+{% endblock %}
+
