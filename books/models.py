@@ -8,13 +8,13 @@ from django.db import models
 
 class Book(models.Model):
     isbn = models.CharField(max_length=13, primary_key=True)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=500)
     author = models.CharField(max_length=255)
-    year_of_publication = models.IntegerField()
+    year_of_publication = models.IntegerField(null=True, blank=True)
     publisher = models.CharField(max_length=255)
-    image_url_s = models.URLField()
-    image_url_m = models.URLField()
-    image_url_l = models.URLField()
+    image_url_s = models.URLField(max_length=1024, null=True, blank=True)
+    image_url_m = models.URLField(max_length=1024, null=True, blank=True)
+    image_url_l = models.URLField(max_length=1024, null=True, blank=True)
 
     def __str__(self):
         return self.title
