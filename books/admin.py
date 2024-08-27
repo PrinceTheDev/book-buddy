@@ -7,7 +7,8 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'location', 'age')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
 
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
