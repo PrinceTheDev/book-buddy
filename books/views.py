@@ -1,24 +1,24 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Book, User, Rating
-from .forms import ContactForm
+from .models import Book, CustomUser, Rating
+from .forms import ContactForm, CustomUserCreationForm
 import requests
 from .recommendation import get_recommendations
-from django.conf import settings  # To access settings like API key
+from django.conf import settings
+
 
 def home(request):
     return render(request, 'home.html')
 
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'signup.html', {'form': form})
 
 def user_login(request):
@@ -92,4 +92,3 @@ def update_books_from_google(request):
             }
         )
     return redirect('book_list')
-

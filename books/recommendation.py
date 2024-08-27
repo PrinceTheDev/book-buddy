@@ -1,7 +1,8 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-from .models import Book, Rating, User
+from .models import Book, Rating
+from django.contrib.auth.models import User
 
 def load_data():
     # Load data from the database

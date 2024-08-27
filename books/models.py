@@ -1,11 +1,5 @@
-"""
-This model consists of models for the books, users and ratings. 
-Gotten from the data set, it will be used to help in the recommendation algorithm.
-"""
-
 from django.db import models
-from django.contrib.auth.models import AbstractUser, User
-
+from django.contrib.auth.models import AbstractUser
 
 class Book(models.Model):
     isbn = models.CharField(max_length=13, primary_key=True)
@@ -16,7 +10,6 @@ class Book(models.Model):
     image_url_s = models.URLField(max_length=1024, null=True, blank=True)
     image_url_m = models.URLField(max_length=1024, null=True, blank=True)
     image_url_l = models.URLField(max_length=1024, null=True, blank=True)
-
     def __str__(self):
         return self.title
 
@@ -28,7 +21,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 class Rating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     rating = models.IntegerField()
 

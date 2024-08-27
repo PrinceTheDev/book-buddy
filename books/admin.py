@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Book, CustomUser, Rating
 
+
 class CustomUserAdmin(BaseUserAdmin):
     model = CustomUser
     list_display = ('username', 'email', 'first_name', 'last_name', 'location', 'age')
