@@ -17,7 +17,7 @@ def fetch_books_from_google(query):
     """
     url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={GOOGLE_BOOKS_API_KEY}'
     response = requests.get(url)
-    response.raise_for_status()  # Ensure we notice bad responses
+    response.raise_for_status()
     data = response.json()
     return data.get('items', [])
 
@@ -87,7 +87,7 @@ def recommend_books(user_id=None):
     """
     Recommends books based on a predefined query.
     """
-    query = 'bestsellers'  # You can change this to any other query for testing
+    query = 'bestsellers'
     items = fetch_books_from_google(query)
     books_data = parse_book_data(items)
     save_books_to_db(books_data)
@@ -96,7 +96,7 @@ def recommend_books(user_id=None):
     if not books_data:
         return []
 
-    book_id = books_data[0]['id']  # Use the first book for recommendations
+    book_id = books_data[0]['id']
     recommended_books = get_recommendations(book_id, books_data, tfidf_matrix)
 
     return recommended_books
@@ -105,6 +105,7 @@ def update_books_from_google(query=''):
     """
     Updates the books in the database based on a search query.
     """
-    books = fetch_books_from_google(query)
+    items = fetch_books_from_google(query)
+    books = parse_book_data(items)
     save_books_to_db(books)
 
