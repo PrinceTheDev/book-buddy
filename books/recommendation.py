@@ -1,5 +1,6 @@
 import requests
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -10,6 +11,17 @@ load_dotenv()
 
 GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY')
 
+
+def validate_and_format_date(date_str):
+    if not date_str:
+        return None
+    try:
+        return datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        try:
+            return datetime.strptime(date_str, '%Y-%m').date().replace(day=1)
+        except ValueError:
+            return None
 
 def fetch_books_from_google(query):
     """
@@ -33,7 +45,7 @@ def parse_book_data(items):
             'title': volume_info.get('title', ''),
             'author': ', '.join(volume_info.get('authors', [])),
             'isbn': next((identifier['identifier'] for identifier in volume_info.get('industryIdentifiers', []) if identifier['type'] == 'ISBN_13'), ''),
-            'publication_date': volume_info.get('publishedDate', ''),
+            'publication_date': validate_and_format_date(volume_info.get('publishedDate', '')),
             'genre': ', '.join(volume_info.get('categories', [])),
             'description': volume_info.get('description', ''),
             'cover_image': volume_info.get('imageLinks', {}).get('thumbnail', ''),
@@ -51,7 +63,7 @@ def save_books_to_db(books):
             defaults={
                 'title': book_data.get('title', ''),
                 'author': book_data.get('author', ''),
-                'publication_date': book_data.get('publication_date', ''),
+                'publication_date': book_data.get('publication_date'),
                 'genre': book_data.get('genre', ''),
                 'description': book_data.get('description', ''),
                 'cover_image': book_data.get('cover_image', '')
