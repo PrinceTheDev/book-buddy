@@ -4,7 +4,7 @@ Gotten from the data set, it will be used to help in the recommendation algorith
 """
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 
 
 class Book(models.Model):
@@ -20,7 +20,7 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     location = models.CharField(max_length=255, blank=True)
     age = models.IntegerField(null=True, blank=True)
 
