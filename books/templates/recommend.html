@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Recommendations{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Book Recommendations</h1>
+    <div class="row">
+        {% for book, similar_books in recommendations %}
+        <div class="col-md-12">
+            <h2>{{ book.title }}</h2>
+            <p><strong>Author:</strong> {{ book.author }}</p>
+            <h3>Similar Books:</h3>
+            <ul>
+                {% for similar_book in similar_books %}
+                <li>{{ similar_book.title }} by {{ similar_book.author }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
