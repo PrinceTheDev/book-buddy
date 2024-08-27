@@ -10,6 +10,7 @@
                 <li>
                     <a href="{% url 'book_detail' book.isbn %}">{{ book.title }}</a>
                     by {{ book.author }}
+                    <img src="{{ book.image_url_m }}" alt="{{ book.title }}">
                 </li>
             {% endfor %}
         </ul>

@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Book
+from .models import Book, User, Rating
 from .forms import ContactForm
 import requests
 from .recommendation import get_recommendations
-
+from django.conf import settings  # To access settings like API key
 
 def home(request):
     return render(request, 'home.html')
@@ -39,7 +39,8 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html')
+    user_ratings = Rating.objects.filter(user=request.user)
+    return render(request, 'profile.html', {'ratings': user_ratings})
 
 def book_list(request):
     books = Book.objects.all()
@@ -52,15 +53,43 @@ def book_detail(request, isbn):
 @login_required
 def recommend_books(request):
     user = request.user
-    recommendations = get_recommendations(user)
-    return render(request, 'recommend.html', {'recommendations': recommendations})
+    recommendations = get_recommendations(user.id)
+    return render(request, 'recommend.html', {'recommended_books': recommendations})
 
 def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
+            subject = 'Contact Form Submission'
+            message = f"Name: {form.cleaned_data['name']}\nEmail: {form.cleaned_data['email']}\nMessage: {form.cleaned_data['message']}"
+            recipient_list = ['prince.uchendu07@gmail.com']
+            send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
             return redirect('home')
     else:
         form = ContactForm()
     return render(request, 'contact.html', {'form': form})
+
+def fetch_books_from_google_api(query):
+    url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={settings.GOOGLE_BOOKS_API_KEY}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json().get('items', [])
+    return []
+
+def update_books_from_google(request):
+    query = 'programming'
+    books_data = fetch_books_from_google_api(query)
+    for item in books_data:
+        volume_info = item['volumeInfo']
+        Book.objects.update_or_create(
+            isbn=volume_info.get('industryIdentifiers', [{}])[0].get('identifier', ''),
+            defaults={
+                'title': volume_info.get('title', ''),
+                'author': ', '.join(volume_info.get('authors', [])),
+                'year_of_publication': volume_info.get('publishedDate', '').split('-')[0],
+                'publisher': volume_info.get('publisher', ''),
+                'image_url_m': volume_info.get('imageLinks', {}).get('medium', ''),
+            }
+        )
+    return redirect('book_list')
 

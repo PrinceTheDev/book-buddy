@@ -3,13 +3,13 @@ from .models import Book, User, Rating
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'author', 'year_of_publication')
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('username', 'email', 'first_name', 'last_name')
 
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user', 'book', 'rating')
 

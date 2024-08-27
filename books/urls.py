@@ -11,4 +11,6 @@ urlpatterns = [
     path('books/<str:isbn>/', views.book_detail, name='book_detail'),
     path('recommend/', views.recommend_books, name='recommend'),
     path('contact/', views.contact, name='contact'),
+    path('update_books/', views.update_books_from_google, name='update_books'),
 ]
+
