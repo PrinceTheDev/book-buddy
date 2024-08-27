@@ -58,8 +58,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'book_buddy.urls'
 
-AUTH_USER_MODEL = 'books.CustomUser'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
