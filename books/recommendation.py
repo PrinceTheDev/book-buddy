@@ -7,6 +7,7 @@ from books.models import Book
 
 
 load_dotenv()
+
 GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY')
 
 
