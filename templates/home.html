@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Welcome to Book Buddy!</h1>
+<p>Find your next great read with personalized book recommendations.</p>
+
+<section>
+    <h2>Latest Books</h2>
+    <!-- Example of displaying a list of books -->
+    <ul>
+        {% for book in latest_books %}
+        <li>
+            <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
+            <h3>{{ book.title }}</h3>
+            <p>{{ book.author }}</p>
+            <a href="{% url 'book_detail' book.id %}">View Details</a>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}
+

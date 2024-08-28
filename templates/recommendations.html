@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Recommendations{% endblock %}
+
+{% block content %}
+<h1>Recommended Books</h1>
+<ul>
+    {% for book in recommended_books %}
+    <li>
+        <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
+        <h3>{{ book.title }}</h3>
+        <p>{{ book.author }}</p>
+        <a href="{% url 'book_detail' book.id %}">View Details</a>
+    </li>
+    {% empty %}
+    <p>No recommendations available.</p>
+    {% endfor %}
+</ul>
+{% endblock %}
+

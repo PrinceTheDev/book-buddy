@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<h1>Search Results</h1>
+<form method="get" action="{% url 'search_books' %}">
+    <input type="text" name="query" placeholder="Search for books" value="{{ request.GET.query }}">
+    <button type="submit">Search</button>
+</form>
+
+<ul>
+    {% for book in search_results %}
+    <li>
+        <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
+        <h3>{{ book.title }}</h3>
+        <p>{{ book.author }}</p>
+        <a href="{% url 'book_detail' book.id %}">View Details</a>
+    </li>
+    {% empty %}
+    <p>No books found.</p>
+    {% endfor %}
+</ul>
+{% endblock %}
+
