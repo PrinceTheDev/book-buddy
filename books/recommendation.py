@@ -27,9 +27,18 @@ def fetch_books_from_google(query):
     """
     Fetches books from the Google Books API based on the search query.
     """
+    if not query:
+        logger.error("Query parameter is missing for Google Books API.")
+        raise ValueError("Query parameter cannot be empty")
+
     url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={GOOGLE_BOOKS_API_KEY}'
-    response = requests.get(url)
-    response.raise_for_status()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching books from Google Books API: {e}")
+        return []
+    
     data = response.json()
     return data.get('items', [])
 
@@ -122,7 +131,8 @@ def recommend_books(user_id=None):
             user_books = [interaction.book for interaction in user_interactions]
             if user_books:
                 book_id = user_books[-1].id
-                items = fetch_books_from_google('')
+                query = 'bestsellers'
+                items = fetch_books_from_google(query)
                 books_data = parse_book_data(items)
                 save_books_to_db(books_data)
                 

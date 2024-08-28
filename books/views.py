@@ -46,17 +46,19 @@ def home_view(request):
 @api_view(['GET'])
 def book_detail_view(request, book_id):
     try:
-        book = Book.objects.get(pk=book_id)
+        book = Book.objects.get(id=book_id)
+        serializer = BookSerializer(book)
+        return Response(serializer.data, status=200)
     except Book.DoesNotExist:
-        return Response({'error': "Book does not exist"}, status=404)
-    
-    serializer = BookSerializer(book)
-    return Response({'book': serializer.data}, status=200)
+        return Response({'error': 'Book not found'}, status=404)
 
 @api_view(['GET'])
 def search_results_view(request):
     query = request.GET.get('query', '')
-    books = Book.objects.filter(title__icontains=query)
-    serializer = BookSerializer(books, many=True)
-    return Response({'books': serializer.data, 'query': query}, status=200)
+    if not query:
+        return Response({'books': [], 'query': query}, status=200)
+    
+    items = fetch_books_from_google(query)
+    books_data = parse_book_data(items)
+    return Response({'books': books_data, 'query': query}, status=200)
 
