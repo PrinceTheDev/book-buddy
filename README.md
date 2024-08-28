@@ -1,6 +1,6 @@
 # Book Buddy
 
-![Book Buddy Logo](root/book-buddy/static/images/logo.png)
+![Book Buddy Logo](static/images/logo.png)
 
 ## Project Overview
 
