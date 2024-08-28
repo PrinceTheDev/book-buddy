@@ -12,7 +12,7 @@
             <h3>{{ book.title }}</h3>
             <p>{{ book.author }}</p>
             <p><strong>Genre:</strong> {{ book.genre }}</p>
- 15             <p><strong>Publication Date:</strong> {{ book.public    ation_date }}</p>
+            <p><strong>Publication Date:</strong> {{ book.publication_date }}</p>
             <a href="{% url 'book_detail' book.id %}">View Details</a>
         </li>
         {% endfor %}

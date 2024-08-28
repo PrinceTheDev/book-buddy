@@ -1,63 +1,62 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .recommendation import recommend_books, fetch_books_from_google, parse_book_data
-from .serializers import BookSerializer
 from .models import Book
-from django.template.loader import render_to_string
-from rest_framework import viewsets
+from .serializers import BookSerializer
+from .recommendation import recommend_books, fetch_books_from_google, parse_book_data
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
-    serializers_class = BookSerializer
-
-def home_view(request):
-    featured_books = Book.objects.all().order_by('-publication_date')[:5]
-    return render(request, 'home.html', {'featured_books': featured_books})
-
-def book_detail_view(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
-    related_books = Book.objects.exclude(id=book_id).order_by('-publication_date')[:5]
-    return render(request, 'book_detail.html', {'book': book, 'related_books': related_books})
-
-def search_results_view(request):
-    query = request.GET.get('query', '')
-    if not query:
-        return render(request, 'search_results.html', {'error': 'Query parameter is required'})
-    
-    items = fetch_books_from_google(query)
-    books = parse_book_data(items)
-    return render(request, 'search_results.html', {'search_results': books, 'query': query})
+    serializer_class = BookSerializer
 
 @api_view(['GET'])
-def recommendations_view(request):
-    user_id = request.query_params.get('user_id', None)
-    recommended_books = recommend_books(user_id)
-    serializer = BookSerializer(recommended_books, many=True)
-    return Response(serializer.data)
+def recommend_books_view(request):
+    user_id = request.GET.get('user_id')
+
+    if not user_id:
+        return render(request, 'error.html', {'error': 'User ID is required'})
+
+    try:
+        recommended_books = recommend_books(user_id=user_id)    
+    except Exception as e:
+        return render(request, 'error.html', {'error': str(e)}) 
+
+    return render(request, 'recommendations.html', {'recommended_books': recommended_books})
 
 @api_view(['GET'])
 def search_books_view(request):
-    query = request.query_params.get('query', '')
+    query = request.GET.get('query', '')
     if not query:
-        return Response({'error': 'Query parameter is required'}, status=400)
+        return render(request, 'search_results.html', {'books': [], 'query': query})
     
     items = fetch_books_from_google(query)
-    books = parse_book_data(items)
-    serializer = BookSerializer(books, many=True)
-    return Response(serializer.data)
+    books_data = parse_book_data(items)
+    # Render the search results template with the book data
+    return render(request, 'search_results.html', {'books': books_data, 'query': query})
 
-def recommend_books_view(request):
-    user_id = request.GET.get('user_id')
-    
-    if not user_id:
-        return render(request, 'error.html', {'error': 'User ID is required'})
-    
+@api_view(['GET'])
+def home_view(request):
+    # Fetch featured books here (assuming you have a method to get them)
+    featured_books = Book.objects.filter(is_featured=True)
+    return render(request, 'home.html', {'featured_books': featured_books})
+
+@api_view(['GET'])
+def book_detail_view(request, book_id):
     try:
-        recommended_books = recommend_books(user_id=user_id)
-    except Exception as e:
-        return render(request, 'error.html', {'error': str(e)})
+        book = Book.objects.get(pk=book_id)
+    except Book.DoesNotExist:
+        raise Http404("Book does not exist")
+    return render(request, 'book_detail.html', {'book': book})
 
-    return render(request, 'recommendations.html', {'recommended_books': recommended_books})
+@api_view(['GET'])
+def search_results_view(request):
+    query = request.GET.get('query', '')
+    books = Book.objects.filter(title__icontains=query)
+    return render(request, 'search_results.html', {'books': books, 'query': query})
+
