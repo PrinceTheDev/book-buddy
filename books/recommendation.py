@@ -63,7 +63,7 @@ def save_books_to_db(books):
     Saves or updates the books in the database.
     """
     for book_data in books:
-        if not book_data.get('isbn'):  # Skip books without an ISBN
+        if not book_data.get('isbn'):
             continue
         Book.objects.update_or_create(
             isbn=book_data['isbn'],
@@ -113,19 +113,18 @@ def get_recommendations(book_id, books_data, tfidf_matrix):
 
 def recommend_books(user_id=None):
     """
-    Recommends books based on user interactions ad preferences
+    Recommends books based on user interactions and preferences
     """
     if user_id:
-        # Fetch user interactions
+
         user_interactions = UserBookInteraction.objects.filter(user_id=user_id)
         
         if user_interactions.exists():
-            # Use user interactions to guide recommendations
             user_books = [interaction.book for interaction in user_interactions]
             if user_books:
-                # Use the most recent book interacted with for recommendations
+
                 book_id = user_books[-1].id
-                items = fetch_books_from_google('')  # Use empty query to fetch more books
+                items = fetch_books_from_google('')
                 books_data = parse_book_data(items)
                 save_books_to_db(books_data)
                 
@@ -140,7 +139,6 @@ def recommend_books(user_id=None):
         else:
             logger.info("No user interactions found for recommendations.")
     
-    # Fallback to general recommendations if no user-specific data
     query = 'bestsellers'
     items = fetch_books_from_google(query)
     books_data = parse_book_data(items)
@@ -151,11 +149,10 @@ def recommend_books(user_id=None):
         return []
 
     tfidf_matrix = create_tfidf_matrix(books_data)
-    book_id = books_data[0]['id']  # Use the first book as a reference
+    book_id = books_data[0]['id']
     recommended_books = get_recommendations(book_id, books_data, tfidf_matrix)
 
     return recommended_books
-
 
 def update_books_from_google(query=''):
     """
