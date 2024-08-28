@@ -6,8 +6,13 @@ from .recommendation import recommend_books, fetch_books_from_google, parse_book
 from .serializers import BookSerializer
 from .models import Book
 from django.template.loader import render_to_string
+from rest_framework import viewsets
 
-# Django Views
+
+class BookViewSet(viewsets.ModelViewSet):
+    queryset = Book.objects.all()
+    serializers_class = BookSerializer
+
 def home_view(request):
     return render(request, 'home.html')
 
