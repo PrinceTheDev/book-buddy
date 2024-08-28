@@ -5,12 +5,13 @@ from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from books.models import Book
+import logging
 
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY')
-
 
 def validate_and_format_date(date_str):
     if not date_str:
@@ -40,11 +41,15 @@ def parse_book_data(items):
     books = []
     for item in items:
         volume_info = item.get('volumeInfo', {})
+        isbn_13 = next(
+            (identifier['identifier'] for identifier in volume_info.get('industryIdentifiers', []) 
+             if identifier['type'] == 'ISBN_13'), ''
+        )
         books.append({
             'id': item.get('id', ''),
             'title': volume_info.get('title', ''),
             'author': ', '.join(volume_info.get('authors', [])),
-            'isbn': next((identifier['identifier'] for identifier in volume_info.get('industryIdentifiers', []) if identifier['type'] == 'ISBN_13'), ''),
+            'isbn': isbn_13,
             'publication_date': validate_and_format_date(volume_info.get('publishedDate', '')),
             'genre': ', '.join(volume_info.get('categories', [])),
             'description': volume_info.get('description', ''),
@@ -58,8 +63,10 @@ def save_books_to_db(books):
     Saves or updates the books in the database.
     """
     for book_data in books:
+        if not book_data.get('isbn'):  # Skip books without an ISBN
+            continue
         Book.objects.update_or_create(
-            isbn=book_data.get('isbn', ''),
+            isbn=book_data['isbn'],
             defaults={
                 'title': book_data.get('title', ''),
                 'author': book_data.get('author', ''),
@@ -99,6 +106,7 @@ def get_recommendations(book_id, books_data, tfidf_matrix):
             book = Book.objects.get(isbn=books_data[i]['isbn'])
             recommended_books.append(book)
         except Book.DoesNotExist:
+            logger.warning(f"Book with ISBN {books_data[i]['isbn']} not found in database.")
             continue
 
     return recommended_books
@@ -111,12 +119,13 @@ def recommend_books(user_id=None):
     items = fetch_books_from_google(query)
     books_data = parse_book_data(items)
     save_books_to_db(books_data)
-    tfidf_matrix = create_tfidf_matrix(books_data)
     
     if not books_data:
+        logger.warning("No books found for the query.")
         return []
 
-    book_id = books_data[0]['id']
+    tfidf_matrix = create_tfidf_matrix(books_data)
+    book_id = books_data[0]['id']  # This selects the first book as a reference; consider improving this logic.
     recommended_books = get_recommendations(book_id, books_data, tfidf_matrix)
 
     return recommended_books
