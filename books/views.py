@@ -14,11 +14,13 @@ class BookViewSet(viewsets.ModelViewSet):
     serializers_class = BookSerializer
 
 def home_view(request):
-    return render(request, 'home.html')
+    featured_books = Book.objects.all().order_by('-publication_date')[:5]
+    return render(request, 'home.html', {'featured_books': featured_books})
 
 def book_detail_view(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    return render(request, 'book_detail.html', {'book': book})
+    related_books = Book.objects.exclude(id=book_id).order_by('-publication_date')[:5]
+    return render(request, 'book_detail.html', {'book': book, 'related_books': related_books})
 
 def search_results_view(request):
     query = request.GET.get('query', '')
@@ -27,7 +29,7 @@ def search_results_view(request):
     
     items = fetch_books_from_google(query)
     books = parse_book_data(items)
-    return render(request, 'search_results.html', {'books': books, 'query': query})
+    return render(request, 'search_results.html', {'search_results': books, 'query': query})
 
 @api_view(['GET'])
 def recommendations_view(request):
@@ -47,3 +49,15 @@ def search_books_view(request):
     serializer = BookSerializer(books, many=True)
     return Response(serializer.data)
 
+def recommend_books_view(request):
+    user_id = request.GET.get('user_id')
+    
+    if not user_id:
+        return render(request, 'error.html', {'error': 'User ID is required'})
+    
+    try:
+        recommended_books = recommend_books(user_id=user_id)
+    except Exception as e:
+        return render(request, 'error.html', {'error': str(e)})
+
+    return render(request, 'recommendations.html', {'recommended_books': recommended_books})

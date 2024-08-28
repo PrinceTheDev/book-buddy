@@ -1,13 +1,45 @@
 {% extends 'base.html' %}
 
-{% block title %}Book Details{% endblock %}
+{% block title %}{{ book.title }}{% endblock %}
 
 {% block content %}
 <h1>{{ book.title }}</h1>
-<img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
-<p><strong>Author:</strong> {{ book.author }}</p>
-<p><strong>Publication Date:</strong> {{ book.publication_date }}</p>
-<p><strong>Genre:</strong> {{ book.genre }}</p>
-<p><strong>Description:</strong> {{ book.description }}</p>
+<div class="book-detail">
+    <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
+    <p><strong>Author:</strong> {{ book.author }}</p>
+    <p><strong>Publication Date:</strong> {{ book.publication_date }}</p>
+    <p><strong>Genre:</strong> {{ book.genre }}</p>
+    <p><strong>Description:</strong> {{ book.description }}</p>
+</div>
+
+<section>
+    <h2>User Reviews</h2>
+    <ul>
+        {% for review in book.reviews %}
+        <li>
+            <p><strong>{{ review.user }}:</strong> {{ review.content }}</p>
+        </li>
+        {% empty %}
+        <p>No reviews available.</p>
+        {% endfor %}
+    </ul>
+</section>
+
+<section>
+    <h2>Related Books</h2>
+    <div class="book-list">
+        {% for related_book in related_books %}
+        <div class="book-item">
+            <a href="{% url 'book_detail' related_book.id %}">
+                <img src="{{ related_book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ related_book.title }}">
+                <h3>{{ related_book.title }}</h3>
+                <p>{{ related_book.author }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <p>No related books found.</p>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
 

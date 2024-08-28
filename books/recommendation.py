@@ -4,7 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-from books.models import Book
+from books.models import Book, UserBookInteraction
 import logging
 
 
@@ -113,8 +113,34 @@ def get_recommendations(book_id, books_data, tfidf_matrix):
 
 def recommend_books(user_id=None):
     """
-    Recommends books based on a predefined query.
+    Recommends books based on user interactions ad preferences
     """
+    if user_id:
+        # Fetch user interactions
+        user_interactions = UserBookInteraction.objects.filter(user_id=user_id)
+        
+        if user_interactions.exists():
+            # Use user interactions to guide recommendations
+            user_books = [interaction.book for interaction in user_interactions]
+            if user_books:
+                # Use the most recent book interacted with for recommendations
+                book_id = user_books[-1].id
+                items = fetch_books_from_google('')  # Use empty query to fetch more books
+                books_data = parse_book_data(items)
+                save_books_to_db(books_data)
+                
+                if not books_data:
+                    logger.warning("No books found for recommendations.")
+                    return []
+
+                tfidf_matrix = create_tfidf_matrix(books_data)
+                recommended_books = get_recommendations(book_id, books_data, tfidf_matrix)
+
+                return recommended_books
+        else:
+            logger.info("No user interactions found for recommendations.")
+    
+    # Fallback to general recommendations if no user-specific data
     query = 'bestsellers'
     items = fetch_books_from_google(query)
     books_data = parse_book_data(items)
@@ -125,10 +151,11 @@ def recommend_books(user_id=None):
         return []
 
     tfidf_matrix = create_tfidf_matrix(books_data)
-    book_id = books_data[0]['id']  # This selects the first book as a reference; consider improving this logic.
+    book_id = books_data[0]['id']  # Use the first book as a reference
     recommended_books = get_recommendations(book_id, books_data, tfidf_matrix)
 
     return recommended_books
+
 
 def update_books_from_google(query=''):
     """

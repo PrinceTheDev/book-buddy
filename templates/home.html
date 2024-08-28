@@ -4,21 +4,25 @@
 
 {% block content %}
 <h1>Welcome to Book Buddy!</h1>
-<p>Find your next great read with personalized book recommendations.</p>
+<p>Discover your next great read with our personalized recommendations and featured selections.</p>
 
 <section>
-    <h2>Latest Books</h2>
-    <!-- Example of displaying a list of books -->
-    <ul>
-        {% for book in latest_books %}
-        <li>
-            <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
-            <h3>{{ book.title }}</h3>
-            <p>{{ book.author }}</p>
-            <a href="{% url 'book_detail' book.id %}">View Details</a>
-        </li>
+    <h2>Featured Books</h2>
+    <div class="book-list">
+        {% for book in featured_books %}
+        <div class="book-item">
+            <a href="{% url 'book_detail' book.id %}">
+                <img src="{{ book.cover_image|default:'static/images/default_cover.jpg' }}" alt="{{ book.title }}">
+                <h3>{{ book.title }}</h3>
+                <p>{{ book.author }}</p>
+                <p><strong>Genre:</strong> {{ book.genre }}</p>
+                <p><strong>Publication Date:</strong> {{ book.publication_date }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <p>No featured books available.</p>
         {% endfor %}
-    </ul>
+    </div>
 </section>
 {% endblock %}
 
