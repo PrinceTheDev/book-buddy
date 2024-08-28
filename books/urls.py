@@ -6,11 +6,11 @@ router = DefaultRouter()
 router.register(r'books', BookViewSet)
 
 urlpatterns = [
-    path('', home_view, name='home'),
-    path('book/<int:book_id>/', book_detail_view, name='book_detail'),
-    path('search/', search_results_view, name='search_results'),
     path('api/', include(router.urls)),
     path('api/recommendations/', recommend_books_view, name='recommendations'),
     path('api/search-books/', search_books_view, name='search_books'),
+    path('api/home/', home_view, name='home'),
+    path('api/book/<int:book_id>/', book_detail_view, name='book_detail'),
+    path('api/search/', search_results_view, name='search_results'),
 ]
 

@@ -7,7 +7,6 @@ from sklearn.metrics.pairwise import linear_kernel
 from books.models import Book, UserBookInteraction
 import logging
 
-
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ def save_books_to_db(books):
                 'publication_date': book_data.get('publication_date'),
                 'genre': book_data.get('genre', ''),
                 'description': book_data.get('description', ''),
-                'cover_image': book_data.get('cover_image', '')
+                'cover_image': book_data.get('cover_image', ''),
             }
         )
 
@@ -93,6 +92,7 @@ def get_recommendations(book_id, books_data, tfidf_matrix):
     idx = next((i for i, book in enumerate(books_data) if book['id'] == book_id), None)
     
     if idx is None:
+        logger.warning("Book ID not found in the provided data.")
         return []
 
     sim_scores = list(enumerate(cosine_sim[idx]))
@@ -106,23 +106,21 @@ def get_recommendations(book_id, books_data, tfidf_matrix):
             book = Book.objects.get(isbn=books_data[i]['isbn'])
             recommended_books.append(book)
         except Book.DoesNotExist:
-            logger.warning(f"Book with ISBN {books_data[i]['isbn']} not found in database.")
+            logger.warning(f"Book with ISBN {books_data[i]['isbn']} not found in the database.")
             continue
 
     return recommended_books
 
 def recommend_books(user_id=None):
     """
-    Recommends books based on user interactions and preferences
+    Recommends books based on user interactions and preferences.
     """
     if user_id:
-
         user_interactions = UserBookInteraction.objects.filter(user_id=user_id)
         
         if user_interactions.exists():
             user_books = [interaction.book for interaction in user_interactions]
             if user_books:
-
                 book_id = user_books[-1].id
                 items = fetch_books_from_google('')
                 books_data = parse_book_data(items)
@@ -139,6 +137,7 @@ def recommend_books(user_id=None):
         else:
             logger.info("No user interactions found for recommendations.")
     
+    # Fallback to a default query if no user_id is provided or no interactions are found
     query = 'bestsellers'
     items = fetch_books_from_google(query)
     books_data = parse_book_data(items)
